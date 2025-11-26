@@ -1,44 +1,50 @@
 ﻿using UnityEngine;
-using System.IO; // Dosya işlemleri için kütüphane
+using System.IO;
 using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance; // Her yerden erişim için (Singleton)
+    public static GameManager Instance;
 
     [Header("Oyun Ayarları")]
     [SerializeField] private int baslangicCani = 100;
     [SerializeField] private int baslangicParasi = 200;
 
+    // === UI Bağlantısı ===
+    [Header("UI Bağlantıları")]
+    [SerializeField] private CurrencyView currencyView; // Arkadaşın (Onur) buraya UI scriptini sürükleyecek
+
     // Oyundaki anlık durumlar
     public int MevcutCan { get; private set; }
     public int MevcutPara { get; private set; }
 
-    // Yol Noktaları (Düşmanlar buraya bakıp yürüyecek)
-    // Arkadaşın (Onur) sahnedeki noktaları buraya sürükleyecek.
+    // Yol Noktaları
     public List<Transform> yolNoktalari;
 
     // Log Dosyası Yolu
     private string logDosyaYolu;
 
+    // === DALGA YAPISI ===
+    [System.Serializable]
+    public struct DalgaBilgisi
+    {
+        public string dalgaAdi;
+        public Enemy dusmanTuru;
+        public int adet;
+        public float cikisAraligi;
+    }
+
+    [Header("Dalga Ayarları")]
+    public Transform baslangicNoktasi;
+    public List<DalgaBilgisi> dalgalar;
+    private int mevcutDalgaIndex = 0;
+
     private void Awake()
     {
-        // Singleton Ayarı
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject); // Sahne değişse de silinme
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
+        else { Destroy(gameObject); }
 
-        // Log dosyasını bilgisayarın güvenli bir klasörüne ayarla
-        // Örn: C:/Users/Kullanici/AppData/LocalLow/Sirket/Oyun/savunma_gunlugu.txt
         logDosyaYolu = Path.Combine(Application.persistentDataPath, "savunma_gunlugu.txt");
-
-        // Yeni oyun başlayınca eski logu temizle ve başlığı at
         File.WriteAllText(logDosyaYolu, "=== SİMÜLASYON GÜNLÜĞÜ ===\n");
         GunlukYaz($"Simülasyon Başladı. Başlangıç Can: {baslangicCani}, Para: {baslangicParasi}");
     }
@@ -48,16 +54,24 @@ public class GameManager : MonoBehaviour
         MevcutCan = baslangicCani;
         MevcutPara = baslangicParasi;
 
-        // UI güncellemesi için View katmanına haber ver (Şimdilik sadece logluyoruz)
+        // === Başlangıçta UI'ı Güncelle ===
+        if (currencyView != null)
+        {
+            currencyView.UpdateCurrencyUI(MevcutPara);
+            currencyView.UpdateHealthUI(MevcutCan);
+        }
+
         Debug.Log($"Oyun Başladı! Can: {MevcutCan}, Para: {MevcutPara}");
+        StartCoroutine(DalgaBaslat());
     }
 
-    // === EKONOMİ YÖNETİMİ ===
+    // === EKONOMİ VE İNŞAAT YÖNETİMİ ===
 
     public void ParaEkle(int miktar)
     {
         MevcutPara += miktar;
-        // İleride CurrencyView.Guncelle(MevcutPara) çağıracağız
+        // UI Güncelle
+        if (currencyView != null) currencyView.UpdateCurrencyUI(MevcutPara);
     }
 
     public bool ParaHarcama(int miktar)
@@ -65,6 +79,9 @@ public class GameManager : MonoBehaviour
         if (MevcutPara >= miktar)
         {
             MevcutPara -= miktar;
+            // UI Güncelle
+            if (currencyView != null) currencyView.UpdateCurrencyUI(MevcutPara);
+
             GunlukYaz($"Harcama yapıldı: {miktar}. Kalan Para: {MevcutPara}");
             return true; // Satın alma başarılı
         }
@@ -73,11 +90,33 @@ public class GameManager : MonoBehaviour
         return false; // Para yetmedi
     }
 
-    // === SAĞLIK YÖNETİMİ ===
+    // === KULE İNŞA ETME FONKSİYONU ===
+    public void KuleInsaEt(Tower kulePrefab, Vector3 konum)
+    {
+        // 1. Para Yetiyor mu Kontrolü
+        if (ParaHarcama(kulePrefab.Cost))
+        {
+            // 2. Kuleyi Yarat
+            Tower yeniKule = Instantiate(kulePrefab, konum, Quaternion.identity);
+
+            // 3. Logla (Proje İsteri)
+            GunlukYaz($"Kullanıcı, {konum} konumuna '{yeniKule.NameID}' inşa etti. Kalan Para: {MevcutPara}.");
+        }
+        else
+        {
+            Debug.Log("Kule inşa edilemedi: Para Yetersiz.");
+        }
+    }
+
+    // === SAĞLIK YÖNETİMİ (GÜNCELLENDİ) ===
 
     public void HasarAl(int hasarMiktari)
     {
         MevcutCan -= hasarMiktari;
+
+        // UI Güncelle
+        if (currencyView != null) currencyView.UpdateHealthUI(MevcutCan);
+
         GunlukYaz($"Üs hasar aldı! (-{hasarMiktari}). Kalan Can: {MevcutCan}");
 
         if (MevcutCan <= 0)
@@ -97,89 +136,44 @@ public class GameManager : MonoBehaviour
         {
             GunlukYaz("SON: Üs düştü. KAYBETTİNİZ.");
             Debug.Log("KAYBETTİNİZ!");
-            // Time.timeScale = 0; // Oyunu durdur
         }
     }
 
-    // === LOGLAMA SİSTEMİ (Önemli İster) ===
-
+    // === LOGLAMA SİSTEMİ ===
     public void GunlukYaz(string mesaj)
     {
-        // Mesaja zaman damgası ekle: [14:30:05] Mesaj
         string zamanliMesaj = $"[{System.DateTime.Now.ToString("HH:mm:ss")}] {mesaj}\n";
-
-        // Dosyanın sonuna ekle (Append)
         File.AppendAllText(logDosyaYolu, zamanliMesaj);
-
-        // Konsolda da görelim
-        // Debug.Log("<color=green>LOG:</color> " + mesaj);
     }
 
-    // === DALGA YAPISI (Inspector'da ayarlanabilsin diye Serializable yapıyoruz) ===
-    [System.Serializable]
-    public struct DalgaBilgisi
-    {
-        public string dalgaAdi;         // Örn: "Dalga 1 - Giriş"
-        public Enemy dusmanTuru;        // Hangi düşman çıkacak? (Prefab)
-        public int adet;                // Kaç tane?
-        public float cikisAraligi;      // Kaç saniyede bir çıksın?
-    }
-
-    [Header("Dalga Ayarları")]
-    public Transform baslangicNoktasi;  // Düşmanların doğacağı yer (Start Point)
-    public List<DalgaBilgisi> dalgalar; // Dalga listesi (Editörden doldurulacak)
-
-    // Dalga Kontrolü
-    private int mevcutDalgaIndex = 0;
-
-    // Start fonksiyonunu güncelle: Oyun başlayınca dalgayı başlat!
-    private void Start()
-    {
-        MevcutCan = baslangicCani;
-        MevcutPara = baslangicParasi;
-
-        Debug.Log($"Oyun Başladı! Can: {MevcutCan}, Para: {MevcutPara}");
-
-        // İlk dalgayı başlat (Biraz gecikmeli başlasın ki hazırlanalım)
-        StartCoroutine(DalgaBaslat());
-    }
-
-    // === DALGA OLUŞTURMA MANTIĞI (Coroutine) ===
+    // === DALGA OLUŞTURMA MANTIĞI ===
     System.Collections.IEnumerator DalgaBaslat()
     {
-        // Tüm dalgalar bitene kadar dön
         while (mevcutDalgaIndex < dalgalar.Count)
         {
             DalgaBilgisi suankiDalga = dalgalar[mevcutDalgaIndex];
             GunlukYaz($"--- {suankiDalga.dalgaAdi} Başladı! ---");
 
-            // O dalgadaki düşman sayısı kadar dön
             for (int i = 0; i < suankiDalga.adet; i++)
             {
-                DusmanYarat(suankiDalga.dusmanTuru);
+                if (suankiDalga.dusmanTuru != null)
+                    DusmanYarat(suankiDalga.dusmanTuru);
 
-                // Bir sonraki düşman için bekle (Örn: 1 saniye)
                 yield return new WaitForSeconds(suankiDalga.cikisAraligi);
             }
 
-            // Dalga bitti, bir sonrakine geçmeden önce biraz bekle (Örn: 5 saniye dinlenme)
             GunlukYaz($"{suankiDalga.dalgaAdi} tamamlandı. Sonraki dalga bekleniyor...");
             yield return new WaitForSeconds(5f);
 
-            mevcutDalgaIndex++; // Sonraki dalgaya geç
+            mevcutDalgaIndex++;
         }
-
-        // Döngü bittiyse tüm dalgalar bitmiştir
-        OyunBitti(true); // KAZANDINIZ!
+        OyunBitti(true);
     }
 
     void DusmanYarat(Enemy prefab)
     {
         if (prefab == null || baslangicNoktasi == null) return;
-
-        // Düşmanı sahnede oluştur (Instantiate)
         Enemy yeniDusman = Instantiate(prefab, baslangicNoktasi.position, Quaternion.identity);
-
         GunlukYaz($"Düşman sahnede: {yeniDusman.NameID} (Can: {yeniDusman.CurrentHealth})");
     }
 }
