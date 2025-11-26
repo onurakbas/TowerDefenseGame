@@ -5,13 +5,16 @@ public class BazookaCat : Tower
     [Header("Alan Hasarı Ayarı")]
     [SerializeField] private float patlamaYaricapi = 2f; // Patlama genişliği
 
-    private void Start()
+    protected override void Start()
     {
+        // KULE AYARLARI
         towerNameID = "Bazooka-Cat Heavy";
-        damage = 30f;        // Yüksek Hasar
-        range = 3f;          // Orta Menzil
-        fireRate = 3f;       // Çok Yavaş (3 saniyede 1)
-        cost = 75;           // Pahalı
+        damage = 30f;
+        range = 3f;
+        fireRate = 3f;
+        cost = 75;
+
+        base.Start(); // Artık Tower.cs'de Start metodu olduğu için hata vermeyecek.
     }
 
     // ÖZEL DURUM: Hedef bulurken Uçan Düşmanları görmezden gelmeli
@@ -19,25 +22,27 @@ public class BazookaCat : Tower
     {
         GameObject[] dusmanlar = GameObject.FindGameObjectsWithTag("Enemy");
         float enKisaMesafe = Mathf.Infinity;
-        GameObject enYakinDusman = null;
+        GameObject enYakinDusmanObj = null;
 
         foreach (GameObject dusmanObj in dusmanlar)
         {
-            // Eğer düşman "DroneChihuahua" (Uçan) ise onu pas geç
             Enemy dusmanScript = dusmanObj.GetComponent<Enemy>();
+
+            // Uçan düşmanları atla
             if (dusmanScript is DroneChihuahua) continue;
 
             float mesafe = Vector3.Distance(transform.position, dusmanObj.transform.position);
             if (mesafe < enKisaMesafe)
             {
                 enKisaMesafe = mesafe;
-                enYakinDusman = dusmanObj;
+                enYakinDusmanObj = dusmanObj;
             }
         }
 
-        if (enYakinDusman != null && enKisaMesafe <= range)
+        if (enYakinDusmanObj != null && enKisaMesafe <= range)
         {
-            hedef = enYakinDusman.transform;
+            // Enemy component'ini çekip hedef değişkenine atıyoruz.
+            hedef = enYakinDusmanObj.GetComponent<Enemy>();
         }
         else
         {
@@ -50,17 +55,14 @@ public class BazookaCat : Tower
         if (hedef == null) return;
 
         // ALAN HASARI (Splash Damage) Mantığı
-        // Hedefin etrafındaki herkesi bul
         Collider[] vurulanlar = Physics.OverlapSphere(hedef.transform.position, patlamaYaricapi);
 
         foreach (Collider kurban in vurulanlar)
         {
-            // Sadece "Enemy" etiketli olanlara hasar ver
             if (kurban.CompareTag("Enemy"))
             {
                 Enemy dusmanScript = kurban.GetComponent<Enemy>();
 
-                // Uçan düşmanlar patlamadan etkilenmez (Proje kuralı)
                 if (dusmanScript != null && !(dusmanScript is DroneChihuahua))
                 {
                     float netHasar = MathHelper.NetHasarHesapla(damage, dusmanScript.Armor);
@@ -68,7 +70,6 @@ public class BazookaCat : Tower
                 }
             }
         }
-        // Debug.Log("BOOM! Alan hasarı verildi.");
     }
 
     // Editörde patlama alanını görmek için

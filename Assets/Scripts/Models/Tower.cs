@@ -18,6 +18,10 @@ public abstract class Tower : MonoBehaviour
     public int Cost => cost;
     public string NameID => towerNameID;
 
+    protected virtual void Start()
+    {
+        // Alt sınıfların (BazookaCat vb.) base.Start() çağırabilmesi için eklendi.
+    }
 
     protected virtual void Update()
     {

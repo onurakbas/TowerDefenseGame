@@ -2,7 +2,7 @@
 
 public class SniperCat : Tower
 {
-    private void Start()
+    protected override void Start()
     {
         // === İSTATİSTİKLER ===
         towerNameID = "Sniper-Cat v1";

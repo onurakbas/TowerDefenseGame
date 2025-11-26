@@ -2,7 +2,7 @@
 
 public class HackerCat : Tower
 {
-    private void Start()
+    protected override void Start()
     {
         towerNameID = "Hacker-Cat WiFi";
         damage = 5f;         // Düşük Hasar
