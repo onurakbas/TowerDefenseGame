@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
+using System.Collections;
 
 public abstract class Tower : MonoBehaviour
 {
@@ -10,23 +12,27 @@ public abstract class Tower : MonoBehaviour
     [SerializeField] protected int cost;
 
     protected float fireCountdown = 0f;
-    protected Transform hedef; 
+    // Hedef artık Transform değil, Enemy scripti
+    protected Enemy hedef;
 
     public int Cost => cost;
+    public string NameID => towerNameID;
+
 
     protected virtual void Update()
     {
-        // Hedef yoksa veya menzilden çıktıysa yeni hedef ara
-        if (hedef == null || Vector3.Distance(transform.position, hedef.position) > range)
+        // Hedef yoksa veya menzilden çıktıysa (Pozisyon kontrolü) yeni hedef ara
+        if (hedef == null || Vector3.Distance(transform.position, hedef.transform.position) > range)
         {
-            HedefBul(); 
+            HedefBul();
         }
 
         if (hedef != null)
         {
             if (fireCountdown <= 0f)
             {
-                AtesEt(); 
+                AtesEt();
+                // Atış hızına göre sonraki zamanı ayarla (fireRate saniye cinsindense)
                 fireCountdown = 1f / fireRate;
             }
 
@@ -34,31 +40,29 @@ public abstract class Tower : MonoBehaviour
         }
     }
 
-    // === SOYUT METOTLAR ===
-    // AtesEt: Her kule kendi ateş etme şeklini buraya yazacak
     public abstract void AtesEt();
 
-    // === HEDEF BULMA ===
-    // HedefBul: En yakın düşmanı seçer
+    // Artık Transform yerine Enemy scriptini bulup atıyor
     protected virtual void HedefBul()
     {
         GameObject[] dusmanlar = GameObject.FindGameObjectsWithTag("Enemy");
         float enKisaMesafe = Mathf.Infinity;
-        GameObject enYakinDusman = null;
+        GameObject enYakinDusmanObj = null;
 
-        foreach (GameObject dusman in dusmanlar)
+        foreach (GameObject dusmanObj in dusmanlar)
         {
-            float mesafesi = Vector3.Distance(transform.position, dusman.transform.position);
+            float mesafesi = Vector3.Distance(transform.position, dusmanObj.transform.position);
             if (mesafesi < enKisaMesafe)
             {
                 enKisaMesafe = mesafesi;
-                enYakinDusman = dusman;
+                enYakinDusmanObj = dusmanObj;
             }
         }
 
-        if (enYakinDusman != null && enKisaMesafe <= range)
+        if (enYakinDusmanObj != null && enKisaMesafe <= range)
         {
-            hedef = enYakinDusman.transform;
+            // Enemy scriptini çekip hedef değişkenine atıyoruz.
+            hedef = enYakinDusmanObj.GetComponent<Enemy>();
         }
         else
         {
@@ -66,7 +70,6 @@ public abstract class Tower : MonoBehaviour
         }
     }
 
-    // Menzili sahnede çizdiren yardımcı (Gizmos)
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
