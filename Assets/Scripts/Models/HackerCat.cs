@@ -23,8 +23,7 @@ public class HackerCat : Tower
         // NOT: Enemy sınıfına henüz "Yavaslat" özelliği eklemedik.
         // Şimdilik sadece logluyoruz, ileride Enemy.cs'ye özellik ekleyince burayı açacağız.
 
-        // hedef.HizDusur(0.5f, 3.0f); // %50 Hız, 3 Saniye
-
-        // Debug.Log(hedef.NameID + " hacklendi! Hızı düştü.");
+        hedef.HizDusur(0.5f, 3.0f); // %50 Hız, 3 Saniye
+        Debug.Log(hedef.NameID + " hacklendi! Hızı düştü.");
     }
 }
