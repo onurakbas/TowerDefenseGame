@@ -114,4 +114,72 @@ public class GameManager : MonoBehaviour
         // Konsolda da görelim
         // Debug.Log("<color=green>LOG:</color> " + mesaj);
     }
+
+    // === DALGA YAPISI (Inspector'da ayarlanabilsin diye Serializable yapıyoruz) ===
+    [System.Serializable]
+    public struct DalgaBilgisi
+    {
+        public string dalgaAdi;         // Örn: "Dalga 1 - Giriş"
+        public Enemy dusmanTuru;        // Hangi düşman çıkacak? (Prefab)
+        public int adet;                // Kaç tane?
+        public float cikisAraligi;      // Kaç saniyede bir çıksın?
+    }
+
+    [Header("Dalga Ayarları")]
+    public Transform baslangicNoktasi;  // Düşmanların doğacağı yer (Start Point)
+    public List<DalgaBilgisi> dalgalar; // Dalga listesi (Editörden doldurulacak)
+
+    // Dalga Kontrolü
+    private int mevcutDalgaIndex = 0;
+
+    // Start fonksiyonunu güncelle: Oyun başlayınca dalgayı başlat!
+    private void Start()
+    {
+        MevcutCan = baslangicCani;
+        MevcutPara = baslangicParasi;
+
+        Debug.Log($"Oyun Başladı! Can: {MevcutCan}, Para: {MevcutPara}");
+
+        // İlk dalgayı başlat (Biraz gecikmeli başlasın ki hazırlanalım)
+        StartCoroutine(DalgaBaslat());
+    }
+
+    // === DALGA OLUŞTURMA MANTIĞI (Coroutine) ===
+    System.Collections.IEnumerator DalgaBaslat()
+    {
+        // Tüm dalgalar bitene kadar dön
+        while (mevcutDalgaIndex < dalgalar.Count)
+        {
+            DalgaBilgisi suankiDalga = dalgalar[mevcutDalgaIndex];
+            GunlukYaz($"--- {suankiDalga.dalgaAdi} Başladı! ---");
+
+            // O dalgadaki düşman sayısı kadar dön
+            for (int i = 0; i < suankiDalga.adet; i++)
+            {
+                DusmanYarat(suankiDalga.dusmanTuru);
+
+                // Bir sonraki düşman için bekle (Örn: 1 saniye)
+                yield return new WaitForSeconds(suankiDalga.cikisAraligi);
+            }
+
+            // Dalga bitti, bir sonrakine geçmeden önce biraz bekle (Örn: 5 saniye dinlenme)
+            GunlukYaz($"{suankiDalga.dalgaAdi} tamamlandı. Sonraki dalga bekleniyor...");
+            yield return new WaitForSeconds(5f);
+
+            mevcutDalgaIndex++; // Sonraki dalgaya geç
+        }
+
+        // Döngü bittiyse tüm dalgalar bitmiştir
+        OyunBitti(true); // KAZANDINIZ!
+    }
+
+    void DusmanYarat(Enemy prefab)
+    {
+        if (prefab == null || baslangicNoktasi == null) return;
+
+        // Düşmanı sahnede oluştur (Instantiate)
+        Enemy yeniDusman = Instantiate(prefab, baslangicNoktasi.position, Quaternion.identity);
+
+        GunlukYaz($"Düşman sahnede: {yeniDusman.NameID} (Can: {yeniDusman.CurrentHealth})");
+    }
 }
