@@ -6,11 +6,11 @@ public class MechaBulldog : Enemy
     {
         // === ZIRHLI DÜŞMAN AYARLARI ===
         enemyNameID = "Mecha-Bulldog MK2";
-        maxHealth = 75f; [cite_start]// %50 Daha fazla can [cite: 55]
-        armor = 100f; [cite_start]// Zırh var! [cite: 55]
-        speed = 2.5f; [cite_start]// %50 Daha yavaş [cite: 55]
-        reward = 20; [cite_start]// Ödül [cite: 56]
-        baseDamage = 10; [cite_start]// Üsse daha çok hasar verir [cite: 57]
+        maxHealth = 75f; // %50 Daha fazla can 
+        armor = 100f; // Zırh var! 
+        speed = 2.5f; // %50 Daha yavaş 
+        reward = 20; // Ödül 
+        baseDamage = 10; // Üsse daha çok hasar verir 
 
         base.Start();
     }

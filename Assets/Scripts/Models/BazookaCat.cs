@@ -51,7 +51,7 @@ public class BazookaCat : Tower
 
         // ALAN HASARI (Splash Damage) Mantığı
         // Hedefin etrafındaki herkesi bul
-        Collider[] vurulanlar = Physics.OverlapSphere(hedef.position, patlamaYaricapi);
+        Collider[] vurulanlar = Physics.OverlapSphere(hedef.transform.position, patlamaYaricapi);
 
         foreach (Collider kurban in vurulanlar)
         {
@@ -75,6 +75,6 @@ public class BazookaCat : Tower
     void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-        if (hedef != null) Gizmos.DrawWireSphere(hedef.position, patlamaYaricapi);
+        if (hedef != null) Gizmos.DrawWireSphere(hedef.transform.position, patlamaYaricapi);
     }
 }

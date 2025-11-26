@@ -8,11 +8,11 @@ public class RoboPug : Enemy
     {
         // === KONSEPT AYARLARI (Standart) ===
         enemyNameID = "Robo-Pug v1";
-        maxHealth = 50f; [cite_start]// Standart Can [cite: 51]
-        armor = 0f; [cite_start]// Zırhsız [cite: 51]
-        speed = 5f; [cite_start]// Normal Hız [cite: 51]
-        reward = 10; [cite_start]// Ödül: 10 Para [cite: 52]
-        baseDamage = 5; [cite_start]// Üsse vuracağı hasar [cite: 52]
+        maxHealth = 50f; // Standart Can 
+        armor = 0f; // Zırhsız 
+        speed = 5f; // Normal Hız 
+        reward = 10; // Ödül: 10 Para 
+        baseDamage = 5; // Üsse vuracağı hasar
 
         base.Start(); // Canı fullemek için ana sınıfın Start'ını çağırıyoruz
     }
