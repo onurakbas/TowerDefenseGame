@@ -36,15 +36,19 @@ public class TowerTile : MonoBehaviour
 	{
 		if (EventSystem.current.IsPointerOverGameObject()) return;
 
+		// EĞER KULE VARSA ÇIK
 		if (insaEdilenKule != null)
 		{
-			Debug.Log("Burada zaten bir kule var! (Belki ilerde satma/upgrade eklenir)");
+			Debug.Log("Burada zaten kule var!");
 			return;
 		}
 
-		// NOT: Tıklama ile inşaat için "BuildManager" gerekir. 
-		// Şimdilik sadece KuleyiYerlestir fonksiyonunu dışarıdan (UI'dan) çağıracağız.
-		Debug.Log("Kule yeri seçildi. Lütfen kule butonuna basın.");
+		// BUILD MANAGER'DAN SEÇİLİ KULEYİ AL
+		Tower secilen = BuildManager.Instance.GetSecilenKule();
+		if (secilen == null) return; // Kule seçmemiş
+
+		// İNŞA ET
+		KuleyiYerlestir(secilen);
 	}
 
 	// === TÜRKÇE FONKSİYON ===

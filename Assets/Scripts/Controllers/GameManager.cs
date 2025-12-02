@@ -176,4 +176,23 @@ public class GameManager : MonoBehaviour
         Enemy yeniDusman = Instantiate(prefab, baslangicNoktasi.position, Quaternion.identity);
         GunlukYaz($"Düşman sahnede: {yeniDusman.NameID} (Can: {yeniDusman.CurrentHealth})");
     }
+    private void OnDrawGizmos()
+    {
+        // Eğer yol noktaları yoksa çizme
+        if (yolNoktalari == null || yolNoktalari.Count < 2) return;
+
+        Gizmos.color = Color.green; // Çizgi rengi yeşil olsun
+
+        for (int i = 0; i < yolNoktalari.Count - 1; i++)
+        {
+            if (yolNoktalari[i] != null && yolNoktalari[i+1] != null)
+            {
+                // Noktalar arasına çizgi çek
+                Gizmos.DrawLine(yolNoktalari[i].position, yolNoktalari[i+1].position);
+                // Noktanın yerini belli et
+                Gizmos.DrawSphere(yolNoktalari[i].position, 0.2f);
+            }
+        }
+    }
+    
 }

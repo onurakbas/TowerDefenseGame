@@ -25,9 +25,16 @@ public class CurrencyView : MonoBehaviour
     // GameManager bu fonksiyonu çağıracak
     public void UpdateCurrencyUI(int currentCurrency)
     {
+        // AJAN LOG: Bakalım bu fonksiyon hiç çağrılıyor mu?
+        Debug.Log("Tabelacıya Emir Geldi! Yeni Para: " + currentCurrency);
+
         if (currencyText != null)
         {
             currencyText.text = "CRYPTO: " + currentCurrency.ToString();
+        }
+        else
+        {
+            Debug.LogError("HATA: Tabelacı kalemi (ParaText) bulamıyor!");
         }
     }
 }
