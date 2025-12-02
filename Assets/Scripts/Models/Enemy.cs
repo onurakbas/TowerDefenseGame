@@ -28,6 +28,7 @@ public abstract class Enemy : MonoBehaviour
     public float Armor => armor;
     public int Reward => reward;
     public int BaseDmg => baseDamage;
+    public int WaypointIndex => currentWaypointIndex;
 
     // === BAŞLANGIÇ AYARLARI (TEK FONKSİYONDA BİRLEŞTİRİLDİ) ===
     protected virtual void Start()
