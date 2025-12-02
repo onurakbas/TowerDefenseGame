@@ -40,7 +40,10 @@ public class RoboPug : Enemy
 
     public override void UsseSaldir()
     {
-        // GameManager.CanAzalt(baseDamage) komutu buraya gelecek
+        if (GameManager.Instance != null) 
+         {
+           GameManager.Instance.HasarAl(baseDamage);
+         }
         Debug.Log($"{enemyNameID} ana sunucuyu ısırdı! Hasar: {baseDamage}");
         Destroy(gameObject);
     }

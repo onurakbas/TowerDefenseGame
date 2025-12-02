@@ -34,6 +34,10 @@ public class MechaBulldog : Enemy
 
     public override void UsseSaldir()
     {
+        if (GameManager.Instance != null) 
+        {
+            GameManager.Instance.HasarAl(baseDamage);
+        }
         Debug.Log($"{enemyNameID} güvenlik duvarını yıktı! Hasar: {baseDamage}");
         Destroy(gameObject);
     }

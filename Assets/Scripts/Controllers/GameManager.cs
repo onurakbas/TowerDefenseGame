@@ -9,7 +9,9 @@ public class GameManager : MonoBehaviour
     [Header("Oyun Ayarları")]
     [SerializeField] private int baslangicCani = 100;
     [SerializeField] private int baslangicParasi = 200;
-
+    [Header("Bekleme Süresi")]
+    public float baslamaGecikmesi = 10f; // Oyun başlayınca kaç saniye beklesin?
+    
     // === UI Bağlantısı ===
     [Header("UI Bağlantıları")]
     [SerializeField] private CurrencyView currencyView; // Arkadaşın (Onur) buraya UI scriptini sürükleyecek
@@ -149,6 +151,8 @@ public class GameManager : MonoBehaviour
     // === DALGA OLUŞTURMA MANTIĞI ===
     System.Collections.IEnumerator DalgaBaslat()
     {
+        GunlukYaz($"Oyunun başlamasına {baslamaGecikmesi} saniye var. Hazırlan!");
+        yield return new WaitForSeconds(baslamaGecikmesi);
         while (mevcutDalgaIndex < dalgalar.Count)
         {
             DalgaBilgisi suankiDalga = dalgalar[mevcutDalgaIndex];

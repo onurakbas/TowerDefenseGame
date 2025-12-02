@@ -33,6 +33,10 @@ public class DroneChihuahua : Enemy
 
     public override void UsseSaldir()
     {
+        if (GameManager.Instance != null) 
+        {
+            GameManager.Instance.HasarAl(baseDamage);
+        }
         Debug.Log($"{enemyNameID} havadan sızdı! Hasar: {baseDamage}");
         Destroy(gameObject);
     }
