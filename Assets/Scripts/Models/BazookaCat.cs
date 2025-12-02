@@ -9,7 +9,7 @@ public class BazookaCat : Tower
     {
         // KULE AYARLARI
         towerNameID = "Bazooka-Cat Heavy";
-        damage = 30f;
+        damage = 20f;
         range = 3f;
         fireRate = 3f;
         cost = 75;
@@ -21,33 +21,40 @@ public class BazookaCat : Tower
     protected override void HedefBul()
     {
         GameObject[] dusmanlar = GameObject.FindGameObjectsWithTag("Enemy");
-        float enKisaMesafe = Mathf.Infinity;
-        GameObject enYakinDusmanObj = null;
+
+        Enemy enOncelikliDusman = null;
+        int enYuksekWaypointIndex = -1;
+        float enKisaMesafeKuleye = Mathf.Infinity;
 
         foreach (GameObject dusmanObj in dusmanlar)
         {
+            // Menzil Kontrolü
+            float mesafe = Vector3.Distance(transform.position, dusmanObj.transform.position);
+            if (mesafe > range) continue;
+
             Enemy dusmanScript = dusmanObj.GetComponent<Enemy>();
 
-            // Uçan düşmanları atla
+            // ÖZEL KURAL: Uçan düşmanları atla
             if (dusmanScript is DroneChihuahua) continue;
 
-            float mesafe = Vector3.Distance(transform.position, dusmanObj.transform.position);
-            if (mesafe < enKisaMesafe)
+            // PDF KURALI: Üsse en yakın olanı seç
+            if (dusmanScript.WaypointIndex > enYuksekWaypointIndex)
             {
-                enKisaMesafe = mesafe;
-                enYakinDusmanObj = dusmanObj;
+                enYuksekWaypointIndex = dusmanScript.WaypointIndex;
+                enOncelikliDusman = dusmanScript;
+                enKisaMesafeKuleye = mesafe;
+            }
+            else if (dusmanScript.WaypointIndex == enYuksekWaypointIndex)
+            {
+                if (mesafe < enKisaMesafeKuleye)
+                {
+                    enKisaMesafeKuleye = mesafe;
+                    enOncelikliDusman = dusmanScript;
+                }
             }
         }
 
-        if (enYakinDusmanObj != null && enKisaMesafe <= range)
-        {
-            // Enemy component'ini çekip hedef değişkenine atıyoruz.
-            hedef = enYakinDusmanObj.GetComponent<Enemy>();
-        }
-        else
-        {
-            hedef = null;
-        }
+        hedef = enOncelikliDusman;
     }
 
     public override void AtesEt()
@@ -56,6 +63,8 @@ public class BazookaCat : Tower
 
         // ALAN HASARI (Splash Damage) Mantığı
         Collider[] vurulanlar = Physics.OverlapSphere(hedef.transform.position, patlamaYaricapi);
+
+        GameManager.Instance.GunlukYaz($"Kule '{towerNameID}' alan atışı yaptı. Merkez Hedef: {hedef.NameID}");
 
         foreach (Collider kurban in vurulanlar)
         {
@@ -67,6 +76,8 @@ public class BazookaCat : Tower
                 {
                     float netHasar = MathHelper.NetHasarHesapla(damage, dusmanScript.Armor);
                     dusmanScript.HasarAl(netHasar);
+
+                    GameManager.Instance.GunlukYaz($"   -> Alan Hasarı: '{dusmanScript.NameID}' Net Hasar: {netHasar}");
                 }
             }
         }

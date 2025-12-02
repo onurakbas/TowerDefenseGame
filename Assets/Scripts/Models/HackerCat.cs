@@ -5,7 +5,7 @@ public class HackerCat : Tower
     protected override void Start()
     {
         towerNameID = "Hacker-Cat WiFi";
-        damage = 5f;         // Düşük Hasar
+        damage = 15f;         // Düşük Hasar
         range = 3.5f;        // İyi Menzil
         fireRate = 2f;       // Orta Hız (2 saniyede 1)
         cost = 70;
@@ -24,6 +24,6 @@ public class HackerCat : Tower
         // Şimdilik sadece logluyoruz, ileride Enemy.cs'ye özellik ekleyince burayı açacağız.
 
         hedef.HizDusur(0.5f, 3.0f); // %50 Hız, 3 Saniye
-        Debug.Log(hedef.NameID + " hacklendi! Hızı düştü.");
+        GameManager.Instance.GunlukYaz($"Kule '{towerNameID}' -> '{hedef.NameID}' hacklendi. Net Hasar: {netHasar}, Yavaşlatma uygulandı.");
     }
 }

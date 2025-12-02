@@ -47,31 +47,43 @@ public abstract class Tower : MonoBehaviour
     public abstract void AtesEt();
 
     // Artık Transform yerine Enemy scriptini bulup atıyor
+    // Tower.cs içindeki HedefBul metodu:
     protected virtual void HedefBul()
     {
         GameObject[] dusmanlar = GameObject.FindGameObjectsWithTag("Enemy");
-        float enKisaMesafe = Mathf.Infinity;
-        GameObject enYakinDusmanObj = null;
+
+        Enemy enOncelikliDusman = null;
+        // En yüksek index = Üsse en yakın demek (Yolun sonuna yaklaşmış)
+        int enYuksekWaypointIndex = -1;
+        float enKisaMesafeKuleye = Mathf.Infinity; // Eşitlik durumunda kuleye yakına bakarız
 
         foreach (GameObject dusmanObj in dusmanlar)
         {
-            float mesafesi = Vector3.Distance(transform.position, dusmanObj.transform.position);
-            if (mesafesi < enKisaMesafe)
+            // Menzil Kontrolü (Kuleye uzaklığı range'den büyükse hesaba katma)
+            float mesafe = Vector3.Distance(transform.position, dusmanObj.transform.position);
+            if (mesafe > range) continue;
+
+            Enemy dusmanScript = dusmanObj.GetComponent<Enemy>();
+
+            // PDF KURALI: Üsse en yakın olan (Waypoint indexi en büyük olan) önceliklidir.
+            if (dusmanScript.WaypointIndex > enYuksekWaypointIndex)
             {
-                enKisaMesafe = mesafesi;
-                enYakinDusmanObj = dusmanObj;
+                enYuksekWaypointIndex = dusmanScript.WaypointIndex;
+                enOncelikliDusman = dusmanScript;
+                enKisaMesafeKuleye = mesafe;
+            }
+            // Eğer aynı noktadalarsa, kuleye daha yakın olanı seç (İkincil kriter)
+            else if (dusmanScript.WaypointIndex == enYuksekWaypointIndex)
+            {
+                if (mesafe < enKisaMesafeKuleye)
+                {
+                    enKisaMesafeKuleye = mesafe;
+                    enOncelikliDusman = dusmanScript;
+                }
             }
         }
 
-        if (enYakinDusmanObj != null && enKisaMesafe <= range)
-        {
-            // Enemy scriptini çekip hedef değişkenine atıyoruz.
-            hedef = enYakinDusmanObj.GetComponent<Enemy>();
-        }
-        else
-        {
-            hedef = null;
-        }
+        hedef = enOncelikliDusman;
     }
 
     void OnDrawGizmosSelected()

@@ -28,17 +28,23 @@ public class GameManager : MonoBehaviour
 
     // === DALGA YAPISI ===
     [System.Serializable]
-    public struct DalgaBilgisi
+    public struct DusmanGrubu
+    {
+        public Enemy dusmanTuru;   // Hangi düşman prefabı?
+        public int adet;           // Kaç tane çıksın?
+        public float cikisAraligi; // Arka arkaya kaç sn arayla çıksın?
+    }
+
+    [System.Serializable]
+    public struct Dalga
     {
         public string dalgaAdi;
-        public Enemy dusmanTuru;
-        public int adet;
-        public float cikisAraligi;
+        public List<DusmanGrubu> gruplar; // Eski "tek düşman" yerine "grup listesi"
     }
 
     [Header("Dalga Ayarları")]
     public Transform baslangicNoktasi;
-    public List<DalgaBilgisi> dalgalar;
+    public List<Dalga> dalgalar; // Değişken tipi güncellendi
     private int mevcutDalgaIndex = 0;
 
     private void Awake()
@@ -151,26 +157,42 @@ public class GameManager : MonoBehaviour
     // === DALGA OLUŞTURMA MANTIĞI ===
     System.Collections.IEnumerator DalgaBaslat()
     {
-        GunlukYaz($"Oyunun başlamasına {baslamaGecikmesi} saniye var. Hazırlan!");
+        GunlukYaz($"Oyunun başlamasına {baslamaGecikmesi} saniye var.");
         yield return new WaitForSeconds(baslamaGecikmesi);
+
+        // Tüm dalgaları dön
         while (mevcutDalgaIndex < dalgalar.Count)
         {
-            DalgaBilgisi suankiDalga = dalgalar[mevcutDalgaIndex];
+            Dalga suankiDalga = dalgalar[mevcutDalgaIndex];
             GunlukYaz($"--- {suankiDalga.dalgaAdi} Başladı! ---");
 
-            for (int i = 0; i < suankiDalga.adet; i++)
+            // O dalganın içindeki HER BİR GRUBU (Sub-wave) dön
+            // Örn: Önce 2 Pug çıkar, bittikten sonra 1 Bulldog çıkar...
+            foreach (var grup in suankiDalga.gruplar)
             {
-                if (suankiDalga.dusmanTuru != null)
-                    DusmanYarat(suankiDalga.dusmanTuru);
+                for (int i = 0; i < grup.adet; i++)
+                {
+                    if (grup.dusmanTuru != null)
+                        DusmanYarat(grup.dusmanTuru);
 
-                yield return new WaitForSeconds(suankiDalga.cikisAraligi);
+                    yield return new WaitForSeconds(grup.cikisAraligi);
+                }
+                // Gruplar arası çok kısa bekleme (örn 1 sn) ki birbirine girmesin
+                yield return new WaitForSeconds(1f);
             }
 
-            GunlukYaz($"{suankiDalga.dalgaAdi} tamamlandı. Sonraki dalga bekleniyor...");
+            GunlukYaz($"{suankiDalga.dalgaAdi} bitti. Sonraki dalga bekleniyor...");
+
+            // Dalga arası bekleme süresi (5 saniye)
             yield return new WaitForSeconds(5f);
 
             mevcutDalgaIndex++;
         }
+
+        // PDF İSTERİ: Dalgalar bitti ama sahnede düşman var mı? Varsa bekle.
+        yield return new WaitUntil(() => GameObject.FindGameObjectsWithTag("Enemy").Length == 0);
+
+        // Kimse kalmadıysa kazan
         OyunBitti(true);
     }
 

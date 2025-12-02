@@ -10,7 +10,7 @@ public class RoboPug : Enemy
         enemyNameID = "Robo-Pug v1";
         maxHealth = 50f; // Standart Can 
         armor = 0f; // Zırhsız 
-        speed = 5f; // Normal Hız 
+        speed = 50f; // Normal Hız 
         reward = 10; // Ödül: 10 Para 
         baseDamage = 5; // Üsse vuracağı hasar
 
