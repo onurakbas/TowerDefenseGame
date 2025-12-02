@@ -33,7 +33,10 @@ public class RoboPug : Enemy
 
     public override void Ol()
     {
-        // GameManager.ParaEkle(reward) komutu buraya gelecek (4. Gün)
+        if (GameManager.Instance != null)
+         {
+             GameManager.Instance.ParaEkle(reward);
+         }
         Debug.Log($"{enemyNameID} hurdaya döndü! Ödül: {reward}");
         Destroy(gameObject); // Sahneden sil
     }

@@ -27,6 +27,10 @@ public class DroneChihuahua : Enemy
 
     public override void Ol()
     {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ParaEkle(reward);
+        }
         Debug.Log($"{enemyNameID} sinyali kesildi! Ödül: {reward}");
         Destroy(gameObject);
     }

@@ -28,6 +28,10 @@ public class MechaBulldog : Enemy
 
     public override void Ol()
     {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ParaEkle(reward);
+        }
         Debug.Log($"{enemyNameID} ağır hasarla patladı! Ödül: {reward}");
         Destroy(gameObject);
     }
