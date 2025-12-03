@@ -19,6 +19,8 @@ public class DroneChihuahua : Enemy
     {
         currentHealth -= miktar;
 
+        GetComponentInChildren<HealthBarView>()?.UpdateHealth(currentHealth, maxHealth);
+        
         if (currentHealth <= 0)
         {
             Ol();

@@ -4,20 +4,25 @@ public class SniperCat : Tower
 {
     // === EFEKT AYARLARI ===
     [Header("Görsel Efektler")]
-    [SerializeField] private GameObject lazerEfektiPrefab; // Lazer ışını görseli
+    [SerializeField] private GameObject lazerEfektiPrefab; // Lazer görseli
     [SerializeField] private AudioClip atisSesi;           // "Pew" sesi
+
+    // ▼▼▼ YENİ EKLENEN KISIM BURASI ▼▼▼
+    [SerializeField] private Transform namluUcu;           // FirePoint buraya gelecek
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
     protected override void Start()
     {
-        // === İSTATİSTİKLER ===
+        // === İSTATİSTİKLER (Inspector'dan ezilebilir) ===
         towerNameID = "Sniper-Cat v1";
-        damage = 10f;        // Taban Hasar
-        range = 4f;          // Uzun Menzil
-        fireRate = 1f;       // Saniyede 1 Atış
-        cost = 50;           // Maliyet
+        
+        // Eğer Inspector'da 0 girildiyse varsayılanları ata
+        if (damage == 0) damage = 20f;
+        if (range == 0) range = 4f;
+        if (fireRate == 0) fireRate = 1f;
+        if (cost == 0) cost = 50;
     }
 
-    // Polimorfizm: AtesEt fonksiyonunu kendine özel yazıyoruz
     public override void AtesEt()
     {
         if (hedef == null) return;
@@ -31,35 +36,45 @@ public class SniperCat : Tower
         // === 2. GÖRSEL EFEKT (Lazer) ===
         if (lazerEfektiPrefab != null)
         {
-            // Efekti kulenin merkezinde yarat
-            GameObject efekt = Instantiate(lazerEfektiPrefab, transform.position, Quaternion.identity);
+            // Namlu ucunu veya merkezi belirle
+            Vector3 cikisNoktasi = (namluUcu != null) ? namluUcu.position : transform.position;
 
-            // Efekti hedefe doğru döndür (2D Rotasyon Hesabı)
-            Vector3 direction = hedef.transform.position - transform.position;
+            // Aradaki mesafeyi ölç (Lazerin boyu bu kadar olacak)
+            float mesafe = Vector3.Distance(cikisNoktasi, hedef.transform.position);
+
+            // Lazeri yarat
+            GameObject efekt = Instantiate(lazerEfektiPrefab, cikisNoktasi, Quaternion.identity);
+
+            // Yönü ayarla (Düşmana bak)
+            Vector3 direction = hedef.transform.position - cikisNoktasi;
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             efekt.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
-            // Not: Lazer prefab'ının kendi kendine yok olması için (Destroy Timer) scripti olmalı 
-            // veya Particle System ise "Stop Action: Destroy" seçili olmalı.
-            Destroy(efekt, 0.2f); // Garanti olsun diye 0.2 sn sonra siliyoruz
+            // --- YENİ EKLENEN KISIM: DİNAMİK BOYUTLANDIRMA ---
+            // Lazerin boyunu (X eksenini) mesafeye eşitle. 
+            // Y (Kalınlık) sabit kalsın (örn: 0.15f).
+            efekt.transform.localScale = new Vector3(mesafe, 0.15f, 1f);
+            // ------------------------------------------------
+
+            // Sadece görsel olduğu için çarpışma özelliğini kapatıyoruz (Garanti olsun)
+            if(efekt.GetComponent<Collider2D>()) Destroy(efekt.GetComponent<Collider2D>());
+
+            Destroy(efekt, 0.1f); // Çok kısa süre ekranda kalsın (Göz kırpma gibi)
         }
 
-        // 1. KURAL: Zırhlı düşmana (MechaBulldog) %50 daha az vurur
+        // === 3. HASAR HESABI ===
+        
+        // KURAL: Zırhlı düşmana %50 az vur
         float uygulanacakHasar = damage;
-
-        if (hedef.Armor > 0) // Eğer düşmanın zırhı varsa
+        if (hedef.Armor > 0)
         {
-            uygulanacakHasar = damage * 0.5f; // Hasarı yarıya indir
-            // Debug.Log("Zırhlı hedef tespit edildi! Hasar düşürüldü.");
+            uygulanacakHasar = damage * 0.5f;
         }
 
-        // 2. KURAL: Matematik Motorunu çağırıp Net Hasarı hesapla
+        // Net hasar hesabı ve uygulama
         float netHasar = MathHelper.NetHasarHesapla(uygulanacakHasar, hedef.Armor);
-
-        // 3. Hedefe hasar ver
         hedef.HasarAl(netHasar);
 
         GameManager.Instance.GunlukYaz($"Kule '{towerNameID}' -> '{hedef.NameID}' hedefine atış yaptı. Net Hasar: {netHasar}");
-        // İleride buraya Lazer Sesi/Efekti eklenecek
     }
 }

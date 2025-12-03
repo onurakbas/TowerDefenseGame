@@ -1,52 +1,37 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
 public class HealthBarView : MonoBehaviour
 {
     [Header("Bileşenler")]
-    [SerializeField] private Slider healthSlider; // Can Barı (Slider)
-    [SerializeField] private SpriteRenderer enemyRenderer; // Düşmanın resmi (Renk değişimi için)
+    [SerializeField] private Transform yesilBar; // Slider yerine Transform kullanıyoruz
+    [SerializeField] private SpriteRenderer enemyRenderer;
 
-    private Color originalColor; // Düşmanın orijinal rengini sakla
+    private Color originalColor;
+    private Vector3 originalScale;
 
     private void Awake()
     {
-        if (enemyRenderer == null)
-            enemyRenderer = GetComponent<SpriteRenderer>();
-
-        if (enemyRenderer != null)
-            originalColor = enemyRenderer.color;
+        if (enemyRenderer == null) enemyRenderer = GetComponent<SpriteRenderer>();
+        if (enemyRenderer != null) originalColor = enemyRenderer.color;
+        
+        // Başlangıç boyutunu hafızaya al
+        if (yesilBar != null) originalScale = yesilBar.localScale;
     }
 
-    public void InitHealth(float maxHealth)
+    public void UpdateHealth(float currentHealth, float maxHealth)
     {
-        if (healthSlider != null)
+        if (yesilBar != null)
         {
-            healthSlider.maxValue = maxHealth;
-            healthSlider.value = maxHealth;
+            // Yüzdeyi hesapla (0 ile 1 arası)
+            float oran = currentHealth / maxHealth;
+            // X eksenini (Genişliği) orana göre küçült
+            yesilBar.localScale = new Vector3(originalScale.x * oran, originalScale.y, originalScale.z);
         }
     }
 
-    public void UpdateHealth(float currentHealth)
-    {
-        if (healthSlider != null)
-        {
-            healthSlider.value = currentHealth;
-
-            // Can %0 ise barı gizle (Patlama efekti oynarken bar görünmesin)
-            if (currentHealth <= 0) healthSlider.gameObject.SetActive(false);
-        }
-    }
-
-    // HackerCat (Buz Kulesi) bu fonksiyonu çağırıp düşmanı mavi yapacak
     public void SetSlowEffect(bool isSlowed)
     {
         if (enemyRenderer != null)
-        {
-            if (isSlowed)
-                enemyRenderer.color = Color.cyan; // Mavi tonu
-            else
-                enemyRenderer.color = originalColor; // Eski rengine dön
-        }
+            enemyRenderer.color = isSlowed ? Color.cyan : originalColor;
     }
 }

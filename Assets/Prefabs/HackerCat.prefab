@@ -97,8 +97,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f37386d33d4b3ea4f9e4f5cd568603ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  towerNameID: 
+  towerNameID: Hacker-Cat WiFi
   damage: 15
-  range: 3
+  range: 3.5
   fireRate: 2
   cost: 70

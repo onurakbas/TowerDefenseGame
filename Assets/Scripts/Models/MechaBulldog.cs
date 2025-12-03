@@ -20,6 +20,8 @@ public class MechaBulldog : Enemy
         // NOT: Zırh formülü burada değil, kule tarafında MathHelper ile hesaplanıp buraya "Net Hasar" olarak gelecek.
         currentHealth -= miktar;
 
+        GetComponentInChildren<HealthBarView>()?.UpdateHealth(currentHealth, maxHealth);
+        
         if (currentHealth <= 0)
         {
             Ol();

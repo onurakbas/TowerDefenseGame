@@ -10,7 +10,7 @@ public class RoboPug : Enemy
         enemyNameID = "Robo-Pug v1";
         maxHealth = 50f; // Standart Can 
         armor = 0f; // Zırhsız 
-        speed = 50f; // Normal Hız 
+        speed = 5f; // Normal Hız 
         reward = 10; // Ödül: 10 Para 
         baseDamage = 5; // Üsse vuracağı hasar
 
@@ -23,6 +23,7 @@ public class RoboPug : Enemy
     {
         currentHealth -= miktar;
 
+        GetComponentInChildren<HealthBarView>()?.UpdateHealth(currentHealth, maxHealth);
         // Buraya ilerde "Havlama Sesi" veya "Kıvılcım Efekti" ekleyebiliriz
 
         if (currentHealth <= 0)

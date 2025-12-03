@@ -10,6 +10,9 @@ public class CurrencyView : MonoBehaviour
     [SerializeField] private Text currencyText;  // Para Yazısı
     [SerializeField] private Text waveText;      // Dalga Yazısı (Opsiyonel)
 
+    [Header("UI Barlar")]
+    [SerializeField] private Slider baseHealthSlider;
+    
     // GameManager bu fonksiyonu çağıracak
     public void UpdateHealthUI(int currentHealth)
     {
@@ -19,6 +22,11 @@ public class CurrencyView : MonoBehaviour
             // Renk değişimi efekti (Can azalınca kızarsın)
             if (currentHealth < 30) healthText.color = Color.red;
             else healthText.color = Color.green;
+        }
+        
+        if (baseHealthSlider != null)
+        {
+            baseHealthSlider.value = currentHealth;
         }
     }
 
@@ -30,7 +38,7 @@ public class CurrencyView : MonoBehaviour
 
         if (currencyText != null)
         {
-            currencyText.text = "CRYPTO: " + currentCurrency.ToString();
+            currencyText.text = currentCurrency.ToString();
         }
         else
         {
