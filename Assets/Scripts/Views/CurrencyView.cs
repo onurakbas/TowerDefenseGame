@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.UI; // Standart UI Text için
-// using TMPro; // Eğer TextMeshPro kullanıyorsan bunu aç
 
 public class CurrencyView : MonoBehaviour
 {

@@ -190,7 +190,6 @@ public class GameManager : MonoBehaviour
     }
 
     // === DALGA OLUŞTURMA MANTIĞI ===
-    // === DALGA OLUŞTURMA MANTIĞI (GÜNCELLENDİ) ===
     System.Collections.IEnumerator DalgaBaslat()
     {
         GunlukYaz($"Oyunun başlamasına {baslamaGecikmesi} saniye var.");

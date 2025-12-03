@@ -6,10 +6,7 @@ public class SniperCat : Tower
     [Header("Görsel Efektler")]
     [SerializeField] private GameObject lazerEfektiPrefab; // Lazer görseli
     [SerializeField] private AudioClip atisSesi;           // "Pew" sesi
-
-    // ▼▼▼ YENİ EKLENEN KISIM BURASI ▼▼▼
     [SerializeField] private Transform namluUcu;           // FirePoint buraya gelecek
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
     protected override void Start()
     {
@@ -50,12 +47,10 @@ public class SniperCat : Tower
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
             efekt.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
-            // --- YENİ EKLENEN KISIM: DİNAMİK BOYUTLANDIRMA ---
             // Lazerin boyunu (X eksenini) mesafeye eşitle. 
             // Y (Kalınlık) sabit kalsın (örn: 0.15f).
             efekt.transform.localScale = new Vector3(mesafe, 0.15f, 1f);
-            // ------------------------------------------------
-
+    
             // Sadece görsel olduğu için çarpışma özelliğini kapatıyoruz (Garanti olsun)
             if(efekt.GetComponent<Collider2D>()) Destroy(efekt.GetComponent<Collider2D>());
 

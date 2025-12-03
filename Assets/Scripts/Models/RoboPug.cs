@@ -24,7 +24,6 @@ public class RoboPug : Enemy
         currentHealth -= miktar;
 
         GetComponentInChildren<HealthBarView>()?.UpdateHealth(currentHealth, maxHealth);
-        // Buraya ilerde "Havlama Sesi" veya "Kıvılcım Efekti" ekleyebiliriz
 
         if (currentHealth <= 0)
         {

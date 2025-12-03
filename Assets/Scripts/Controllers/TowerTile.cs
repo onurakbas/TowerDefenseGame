@@ -70,7 +70,6 @@ public class TowerTile : MonoBehaviour
             Tower yeniKule = Instantiate(kulePrefab, transform.position, Quaternion.identity);
             insaEdilenKule = yeniKule;
 
-            // === KRİTİK DÜZELTME ===
             // Kule dikildiği an bu yeşil/mavi kareyi GÖRÜNMEZ yap.
             // Böylece kedinin altında renk kalmaz.
             rend.enabled = false; 

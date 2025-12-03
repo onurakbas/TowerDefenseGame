@@ -12,7 +12,6 @@ public abstract class Tower : MonoBehaviour
     [SerializeField] protected int cost;
 
     protected float fireCountdown = 0f;
-    // Hedef artık Transform değil, Enemy scripti
     protected Enemy hedef;
 
     public int Cost => cost;
@@ -46,7 +45,6 @@ public abstract class Tower : MonoBehaviour
 
     public abstract void AtesEt();
 
-    // Artık Transform yerine Enemy scriptini bulup atıyor
     // Tower.cs içindeki HedefBul metodu:
     protected virtual void HedefBul()
     {

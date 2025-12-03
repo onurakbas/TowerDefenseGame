@@ -20,9 +20,6 @@ public class HackerCat : Tower
         hedef.HasarAl(netHasar);
 
         // 2. Yavaşlatma Efekti Uygula
-        // NOT: Enemy sınıfına henüz "Yavaslat" özelliği eklemedik.
-        // Şimdilik sadece logluyoruz, ileride Enemy.cs'ye özellik ekleyince burayı açacağız.
-
         hedef.HizDusur(0.5f, 3.0f); // %50 Hız, 3 Saniye
         GameManager.Instance.GunlukYaz($"Kule '{towerNameID}' -> '{hedef.NameID}' hacklendi. Net Hasar: {netHasar}, Yavaşlatma uygulandı.");
     }
