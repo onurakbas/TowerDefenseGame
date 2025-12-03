@@ -266,4 +266,10 @@ public class GameManager : MonoBehaviour
         }
     }
     
+    public void AnaMenuyeDon()
+    {
+        Time.timeScale = 1f; 
+        SceneManager.LoadScene(0); // 0 numaralı sahneye (Menüye) git
+    }
+    
 }

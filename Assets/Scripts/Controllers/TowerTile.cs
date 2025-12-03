@@ -1,73 +1,85 @@
 ﻿using UnityEngine;
-using UnityEngine.EventSystems; // UI'a tıklayınca haritaya tıklamayı engellemek için
+using UnityEngine.EventSystems; // UI engellemesi için gerekli
 
 public class TowerTile : MonoBehaviour
 {
-	[Header("Görsel Ayarlar")]
-	public Color hoverRengi = Color.gray; // Mouse üzerine gelince renk değişsin
-	private Color baslangicRengi;
-	private Renderer rend;
+    [Header("Görsel Ayarlar")]
+    public Color hoverRengi = Color.green; // Mouse üzerine gelince parlayacak renk
+    private Color baslangicRengi;          // Oyun başındaki orijinal renk (Hafif şeffaf)
+    private Renderer rend;
 
-	private Tower insaEdilenKule; // Burada zaten bir kule var mı?
+    private Tower insaEdilenKule; // Bu karede dikili bir kule var mı?
 
-	private void Start()
-	{
-		rend = GetComponent<Renderer>();
-		baslangicRengi = rend.material.color;
-	}
+    private void Start()
+    {
+        rend = GetComponent<Renderer>();
+        baslangicRengi = rend.material.color; // Başlangıç rengini hafızaya al
+    }
 
-	// Unity Event: Mouse üzerine gelince
-	private void OnMouseEnter()
-	{
-		// Eğer bir butona (UI) denk geliyorsa rengi değiştirme
-		if (EventSystem.current.IsPointerOverGameObject()) return;
+    // Mouse karenin üzerine gelince
+    private void OnMouseEnter()
+    {
+        // 1. Eğer mouse bir butonun (UI) üzerindeyse tepki verme
+        if (EventSystem.current.IsPointerOverGameObject()) return;
 
-		rend.material.color = hoverRengi;
-	}
+        // 2. Eğer burada zaten kule varsa renk değiştirme (Zaten görünmez olacak ama garanti olsun)
+        if (insaEdilenKule != null) return;
 
-	// Unity Event: Mouse üzerinden gidince
-	private void OnMouseExit()
-	{
-		rend.material.color = baslangicRengi;
-	}
+        // Rengi değiştir (Parlat)
+        rend.material.color = hoverRengi;
+    }
 
-	// Unity Event: Tıklayınca
-	private void OnMouseDown()
-	{
-		if (EventSystem.current.IsPointerOverGameObject()) return;
+    // Mouse karenin üzerinden gidince
+    private void OnMouseExit()
+    {
+        // Eski haline (Sönük haline) dön
+        if (insaEdilenKule == null)
+        {
+            rend.material.color = baslangicRengi;
+        }
+    }
 
-		// EĞER KULE VARSA ÇIK
-		if (insaEdilenKule != null)
-		{
-			Debug.Log("Burada zaten kule var!");
-			return;
-		}
+    // Tıklama Anı
+    private void OnMouseDown()
+    {
+        // UI kontrolü
+        if (EventSystem.current.IsPointerOverGameObject()) return;
 
-		// BUILD MANAGER'DAN SEÇİLİ KULEYİ AL
-		Tower secilen = BuildManager.Instance.GetSecilenKule();
-		if (secilen == null) return; // Kule seçmemiş
+        // Zaten doluysa işlem yapma
+        if (insaEdilenKule != null)
+        {
+            Debug.Log("Burada zaten kule var!");
+            return;
+        }
 
-		// İNŞA ET
-		KuleyiYerlestir(secilen);
-	}
+        // BuildManager'dan hangi kuleyi seçtiğimizi öğren
+        Tower secilen = BuildManager.Instance.GetSecilenKule();
+        if (secilen == null) return; // Hiçbir kule seçilmemişse çık
 
-	// === TÜRKÇE FONKSİYON ===
-	// Bu fonksiyonu "GameManager" veya UI Butonu çağıracak
-	public void KuleyiYerlestir(Tower kulePrefab)
-	{
-		// Dolu mu kontrol et
-		if (insaEdilenKule != null)
-		{
-			Debug.Log("Yer dolu!");
-			return;
-		}
+        // İnşaat fonksiyonunu çağır
+        KuleyiYerlestir(secilen);
+    }
 
-		// GameManager üzerinden inşaat yap (Para kontrolü orada)
-		// Not: KuleInsaEt fonksiyonunu bool döndürecek şekilde güncellersek daha iyi olur
-		// ama şimdilik doğrudan çağırıyoruz.
-		GameManager.Instance.KuleInsaEt(kulePrefab, transform.position);
+    public void KuleyiYerlestir(Tower kulePrefab)
+    {
+        // 1. Önce GameManager'a sor: Paramız yetiyor mu?
+        // (GameManager.ParaHarcama fonksiyonu true dönerse para düşülmüş demektir)
+        if (GameManager.Instance.ParaHarcama(kulePrefab.Cost)) 
+        {
+            // 2. Kuleyi tam bu karenin üzerine yarat
+            Tower yeniKule = Instantiate(kulePrefab, transform.position, Quaternion.identity);
+            insaEdilenKule = yeniKule;
 
-		// Basitçe burayı dolu işaretle (Prefab referansı tutuyoruz şimdilik)
-		insaEdilenKule = kulePrefab;
-	}
+            // === KRİTİK DÜZELTME ===
+            // Kule dikildiği an bu yeşil/mavi kareyi GÖRÜNMEZ yap.
+            // Böylece kedinin altında renk kalmaz.
+            rend.enabled = false; 
+            
+            GameManager.Instance.GunlukYaz($"Kule '{yeniKule.NameID}' inşa edildi.");
+        }
+        else
+        {
+            Debug.Log("Para Yetersiz!");
+        }
+    }
 }
