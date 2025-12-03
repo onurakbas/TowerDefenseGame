@@ -18,10 +18,10 @@ public class CurrencyView : MonoBehaviour
     {
         if (healthText != null)
         {
-            healthText.text = "MAINFRAME: " + currentHealth.ToString() + "%";
+            healthText.text = currentHealth.ToString();
             // Renk değişimi efekti (Can azalınca kızarsın)
             if (currentHealth < 30) healthText.color = Color.red;
-            else healthText.color = Color.green;
+            else healthText.color = Color.white; 
         }
         
         if (baseHealthSlider != null)

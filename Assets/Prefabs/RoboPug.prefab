@@ -96,6 +96,7 @@ GameObject:
   - component: {fileID: 5136963849920897676}
   - component: {fileID: 3172411374044007968}
   - component: {fileID: 3592283430721508490}
+  - component: {fileID: 5371201819743269362}
   m_Layer: 0
   m_Name: RoboPug
   m_TagString: Enemy
@@ -204,6 +205,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   yesilBar: {fileID: 9179030582151411592}
   enemyRenderer: {fileID: 5136963849920897676}
+--- !u!61 &5371201819743269362
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8567348591743142472}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0.0000009536743, y: -0.11770272}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 28.16229, y: 15.359999}
+    newSize: {x: 28.16229, y: 15.359999}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 18.217157, y: 15.595404}
+  m_EdgeRadius: 0
 --- !u!1 &8581121972706717565
 GameObject:
   m_ObjectHideFlags: 0

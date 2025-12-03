@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.IO;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -16,6 +18,10 @@ public class GameManager : MonoBehaviour
     [Header("UI Bağlantıları")]
     [SerializeField] private CurrencyView currencyView; // Arkadaşın (Onur) buraya UI scriptini sürükleyecek
 
+    [Header("Oyun Sonu UI")]
+    [SerializeField] private GameObject oyunSonuPaneli;
+    [SerializeField] private Text sonucYazisi;
+    
     // Oyundaki anlık durumlar
     public int MevcutCan { get; private set; }
     public int MevcutPara { get; private set; }
@@ -49,12 +55,23 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null) { Instance = this; DontDestroyOnLoad(gameObject); }
-        else { Destroy(gameObject); }
+        if (Instance == null) 
+        { 
+            Instance = this; 
+        }
+        else 
+        { 
+            Destroy(gameObject); 
+            return; 
+        }
+        
+        Time.timeScale = 1f;
 
         logDosyaYolu = Path.Combine(Application.persistentDataPath, "savunma_gunlugu.txt");
         File.WriteAllText(logDosyaYolu, "=== SİMÜLASYON GÜNLÜĞÜ ===\n");
         GunlukYaz($"Simülasyon Başladı. Başlangıç Can: {baslangicCani}, Para: {baslangicParasi}");
+        Debug.Log("Log Dosyası Yolu: " + logDosyaYolu);
+
     }
 
     private void Start()
@@ -135,16 +152,34 @@ public class GameManager : MonoBehaviour
 
     private void OyunBitti(bool kazandi)
     {
-        if (kazandi)
+        // 1. Paneli Aç
+        if (oyunSonuPaneli != null)
         {
-            GunlukYaz("SON: Tüm dalgalar temizlendi. OYUN KAZANILDI!");
-            Debug.Log("KAZANDINIZ!");
+            oyunSonuPaneli.SetActive(true); // Gizli paneli görünür yap
+            
+            if (kazandi)
+            {
+                sonucYazisi.text = "SİSTEM KORUNDU!\nKAZANDINIZ";
+                sonucYazisi.color = Color.green;
+                GunlukYaz("SON: Oyun Kazanıldı.");
+            }
+            else
+            {
+                sonucYazisi.text = "SİSTEM HACKLENDİ!\nKAYBETTİNİZ";
+                sonucYazisi.color = Color.red;
+                GunlukYaz("SON: Oyun Kaybedildi.");
+            }
         }
-        else
-        {
-            GunlukYaz("SON: Üs düştü. KAYBETTİNİZ.");
-            Debug.Log("KAYBETTİNİZ!");
-        }
+
+        // 2. Oyunu Durdur (Zamanı dondur)
+        Time.timeScale = 0f; 
+    }
+
+    // Butona bağlayacağımız fonksiyon
+    public void TekrarOyna()
+    {
+        Time.timeScale = 1f; // Zamanı tekrar akıt
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Bölümü baştan yükle
     }
 
     // === LOGLAMA SİSTEMİ ===
@@ -155,19 +190,33 @@ public class GameManager : MonoBehaviour
     }
 
     // === DALGA OLUŞTURMA MANTIĞI ===
+    // === DALGA OLUŞTURMA MANTIĞI (GÜNCELLENDİ) ===
     System.Collections.IEnumerator DalgaBaslat()
     {
         GunlukYaz($"Oyunun başlamasına {baslamaGecikmesi} saniye var.");
         yield return new WaitForSeconds(baslamaGecikmesi);
 
-        // Tüm dalgaları dön
         while (mevcutDalgaIndex < dalgalar.Count)
         {
             Dalga suankiDalga = dalgalar[mevcutDalgaIndex];
-            GunlukYaz($"--- {suankiDalga.dalgaAdi} Başladı! ---");
 
-            // O dalganın içindeki HER BİR GRUBU (Sub-wave) dön
-            // Örn: Önce 2 Pug çıkar, bittikten sonra 1 Bulldog çıkar...
+            // --- PDF UYUMLU LOGLAMA KISMI ---
+            string detayliBilgi = "";
+            foreach (var grup in suankiDalga.gruplar)
+            {
+                if (grup.dusmanTuru != null)
+                {
+                    // Örn: "Robo-Pug v1: 2, " şeklinde ekler
+                    detayliBilgi += $"{grup.dusmanTuru.NameID}: {grup.adet}, ";
+                }
+            }
+            // Sondaki virgülü temizle
+            if (detayliBilgi.Length > 2) detayliBilgi = detayliBilgi.Substring(0, detayliBilgi.Length - 2);
+
+            GunlukYaz($"{suankiDalga.dalgaAdi} Başladı. ({detayliBilgi})");
+            // --------------------------------
+
+            // Düşmanları Yaratma Döngüsü
             foreach (var grup in suankiDalga.gruplar)
             {
                 for (int i = 0; i < grup.adet; i++)
@@ -177,22 +226,18 @@ public class GameManager : MonoBehaviour
 
                     yield return new WaitForSeconds(grup.cikisAraligi);
                 }
-                // Gruplar arası çok kısa bekleme (örn 1 sn) ki birbirine girmesin
+                // Gruplar arası kısa bekleme
                 yield return new WaitForSeconds(1f);
             }
 
             GunlukYaz($"{suankiDalga.dalgaAdi} bitti. Sonraki dalga bekleniyor...");
-
-            // Dalga arası bekleme süresi (5 saniye)
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(5f); // Dalgalar arası 5 sn mola
 
             mevcutDalgaIndex++;
         }
 
-        // PDF İSTERİ: Dalgalar bitti ama sahnede düşman var mı? Varsa bekle.
+        // Sahnedeki düşmanların bitmesini bekle
         yield return new WaitUntil(() => GameObject.FindGameObjectsWithTag("Enemy").Length == 0);
-
-        // Kimse kalmadıysa kazan
         OyunBitti(true);
     }
 

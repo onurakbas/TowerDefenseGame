@@ -62,11 +62,11 @@ public class BazookaCat : Tower
         if (hedef == null) return;
 
         // ALAN HASARI (Splash Damage) Mantığı
-        Collider[] vurulanlar = Physics.OverlapSphere(hedef.transform.position, patlamaYaricapi);
+        Collider2D[] vurulanlar = Physics2D.OverlapCircleAll(hedef.transform.position, patlamaYaricapi);
 
         GameManager.Instance.GunlukYaz($"Kule '{towerNameID}' alan atışı yaptı. Merkez Hedef: {hedef.NameID}");
 
-        foreach (Collider kurban in vurulanlar)
+        foreach (Collider2D kurban in vurulanlar)
         {
             if (kurban.CompareTag("Enemy"))
             {
