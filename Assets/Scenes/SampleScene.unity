@@ -2472,11 +2472,6 @@ MonoBehaviour:
   - {fileID: 23326533}
   baslangicNoktasi: {fileID: 1518873590}
   dalgalar:
-  - dalgaAdi: deneme
-    gruplar:
-    - dusmanTuru: {fileID: 5191979830125206430, guid: f261a221f5aec441192c7ddcc1db84f0, type: 3}
-      adet: 30
-      cikisAraligi: 0.3
   - dalgaAdi: Dalga 1
     gruplar:
     - dusmanTuru: {fileID: 3172411374044007968, guid: 2fbfdff52d0f243fa9dee9c4de0cae31, type: 3}
