@@ -8,6 +8,26 @@ A 2D tower defense game built with the Unity engine, featuring a cyber-pet theme
 
 ---
 
+## 📸 Screenshots
+
+### 🐱 Tower Placement & Base
+
+![Tower Placement](assets/images/ss_01_gameplay.png)
+
+---
+
+### ⚔️ Combat — Towers Engaging Enemies
+
+![Combat](assets/images/ss_02_combat.png)
+
+---
+
+### 🐶 Enemy Wave Attacking the Base
+
+![Enemy Attack](assets/images/ss_03_enemy_attack.png)
+
+---
+
 ## 📖 Table of Contents
 
 - [Gameplay Overview](#-gameplay-overview)
